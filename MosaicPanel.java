@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class MosaicPanel extends JPanel implements ActionListener, MouseListener {
 
-	private int sq = 8; // 1000/gridsize
+	private int sq = 10; // 1000/gridsize
 	private Grid grid;
 	private BufferedImage buffer;
 
@@ -29,7 +29,7 @@ public class MosaicPanel extends JPanel implements ActionListener, MouseListener
 		setDoubleBuffered(false);
 		this.addMouseListener(this);
 		
-		new Timer(20, new ActionListener() {
+		new Timer(50, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				fillMosaic(buffer.getGraphics());
@@ -52,7 +52,7 @@ public class MosaicPanel extends JPanel implements ActionListener, MouseListener
 
 				switch (thisShape) {
 				case RABBIT:
-					color = new Color(255, 0, 125);
+					color = new Color(0, 255, 0);					
 					g.setColor(color);
 					g.drawOval(w * sq, h * sq, sq - 1, sq - 1);
 					break;
@@ -62,7 +62,12 @@ public class MosaicPanel extends JPanel implements ActionListener, MouseListener
 					g.drawOval(w * sq, h * sq, sq - 1, sq - 1);
 					break;
 				case HUNTER:
-					color = new Color(0, 255, 0);
+					color = new Color(255, 0, 125);
+					g.setColor(color);
+					g.drawOval(w * sq, h * sq, sq - 1, sq - 1);
+					break;
+				case RABFOX:
+					color = new Color(255, 255, 255);
 					g.setColor(color);
 					g.drawOval(w * sq, h * sq, sq - 1, sq - 1);
 					break;

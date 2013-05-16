@@ -1,5 +1,5 @@
 package nl.gameoflife;
 
 public enum Creatures {
-	EMPTY, RABBIT, FOX, HUNTER
+	EMPTY, RABBIT, FOX, HUNTER, RABFOX
 }
