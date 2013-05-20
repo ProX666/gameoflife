@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -13,28 +15,31 @@ import javax.swing.Timer;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class MosaicPanel extends JPanel implements ActionListener, MouseListener {
+public class MosaicPanel extends JPanel implements ActionListener, MouseListener, ComponentListener {
 
-	private int sq = 10; // 1000/gridsize
+	private int sq = GameOfLife.settings.getSq();
 	private Grid grid;
 	private BufferedImage buffer;
-
-
+	private int gridW, gridH;
 
 	public MosaicPanel(Grid grid) {
+		gridW = GameOfLife.settings.getWorldSize();
+		gridH = GameOfLife.settings.getWorldSize();
+
 		this.grid = grid;
-		this.buffer = new BufferedImage(1200, 1200, BufferedImage.TYPE_INT_ARGB);
+		this.buffer = new BufferedImage(gridW, gridH, BufferedImage.TYPE_INT_ARGB);
 		setBackground(Color.BLACK);
-		setPreferredSize(new Dimension(1200, 1200));
+		setPreferredSize(new Dimension(gridW, gridH));
 		setDoubleBuffered(false);
 		this.addMouseListener(this);
 		
-		new Timer(50, new ActionListener() {
+		new Timer(GameOfLife.settings.getSpeed(), new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				fillMosaic(buffer.getGraphics());
 			}
-		}).start();		
+		}).start();
+		
 	}
 
 	public void paintComponent(Graphics g) {				
@@ -125,6 +130,31 @@ public class MosaicPanel extends JPanel implements ActionListener, MouseListener
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ListIterator;
 import java.util.Random;
 // import java.util.Timer;
 
@@ -20,6 +21,8 @@ public class Life extends JPanel implements ActionListener {
 	static int gens = 1;
 	static int rabbitsBorn = 0;
 	static int rabbitsDead = 0;
+	static Grid nextGrid;
+	static boolean isDiff = true;
 
 	Life() {
 		setLayout(new BorderLayout(3, 3));
@@ -27,37 +30,33 @@ public class Life extends JPanel implements ActionListener {
 		setBorder(BorderFactory.createLineBorder(Color.GRAY, 3));
 
 		grid = new Grid();
-		//grid.setLive(Shapes.PULSAR, Creatures.RABBIT, 80, 50);
-		//grid.setLive(Shapes.PULSAR, Creatures.FOX, 40, 10);
-
-		createRandomLife(0, grid.getGridSize(), Creatures.RABBIT, 4); // geel
-		//createRandomLife(0, grid.getGridSize(), Creatures.FOX, 8); // blauw	
-		//createRandomLife(0, grid.getGridSize(), Creatures.HUNTER, 8); // rose	
-		
-		createRandomLife(0, grid.getGridSize() / 2, Creatures.FOX, 12); // blauw
-		createRandomLife(grid.getGridSize() / 2, grid.getGridSize(), Creatures.HUNTER, 12); // geel		
+		ListIterator<Creature> creatureIter = GameOfLife.settings.creatureList.listIterator();
+		while (creatureIter.hasNext()) {
+			Creature thisCreature = creatureIter.next();
+			createRandomLife((int) (grid.getGridSize() * (thisCreature.getMin() / 100.0)), (int) (grid.getGridSize() * (thisCreature.getMax() / 100.0)), thisCreature.getCreature(), thisCreature.getDensity());
+		}
 
 		display = new MosaicPanel(grid);
 		this.add(display, BorderLayout.CENTER);
-		
 
-		
-		new Timer(100, new ActionListener() {
+		new Timer(GameOfLife.settings.getSpeed(), new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				testForLife(Creatures.RABBIT);
-				
-				testForLife(Creatures.FOX);
+				ListIterator<Creature> creatureIter = GameOfLife.settings.creatureList.listIterator();
+				while (creatureIter.hasNext()) {
+					Creature thisCreature = creatureIter.next();
+					testForLife(thisCreature.getCreature());
+				}
+
 				testForEating(Creatures.FOX, Creatures.RABBIT);
-								
-				testForLife(Creatures.HUNTER);
 				testForEating(Creatures.HUNTER, Creatures.FOX);
-				testForEating(Creatures.HUNTER, Creatures.RABBIT);	
-				
+				testForEating(Creatures.HUNTER, Creatures.RABBIT);
+
 				GameOfLife.gensLabel.setText("Generation: " + gens++);
 			}
+
 		}).start();
-		
+
 	}
 
 	public static void resetGens() {
@@ -75,52 +74,43 @@ public class Life extends JPanel implements ActionListener {
 		}
 	}
 
-	
 	private boolean getSomeLive(int density) {
 		Random rand = new Random();
 		return rand.nextInt(density) == 0 ? true : false;
 	}
 
 	/*
-	 * Any live cell with fewer than two live neighbours dies, as if caused by
-	 * under-population.
+	 * Any live cell with fewer than two live neighbours dies, as if caused by under-population.
 	 * 
-	 * Any live cell with two or three live neighbours lives on to the next
-	 * generation.
+	 * Any live cell with two or three live neighbours lives on to the next generation.
 	 * 
-	 * Any live cell with more than three live neighbours dies, as if by
-	 * overcrowding.
+	 * Any live cell with more than three live neighbours dies, as if by overcrowding.
 	 * 
-	 * Any dead cell with exactly three live neighbours becomes a live cell, as
-	 * if by reproduction.
+	 * Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 	 */
-	
+
 	// TODO: @random iteration instead of 0 to max!
-	
+
 	private void testForLife(Creatures creature) {
-		Grid nextGrid = new Grid();
+		nextGrid = new Grid();
 		Creatures thisCreature;
 		int neighbors;
 
-		// action on tempGrid;
 		for (int w = 0; w != grid.getGridSize(); w++) {
 			for (int h = 0; h != grid.getGridSize(); h++) {
 				thisCreature = grid.getCreature(w, h);
 				// find all same creatures around us
 				neighbors = calculateNeighbors(w, h, thisCreature, creature);
 
-				// if a shape is found, check if it is the creature we are
-				// looking for
-
+				// if a shape is found, check if it is the creature we are looking for
 				if (thisCreature == creature) {
-					// if there are enough same creatures around us then stay
-					// alive
+					// if there are enough same creatures around us then stay alive
 					if ((neighbors >= 2) && (neighbors <= 3)) {
 						nextGrid.setCreature(w, h, creature);
 					} // else nextGrid(w, h) stays empty
 				} else if (thisCreature == Creatures.EMPTY && neighbors == 3) {
 					// dead cell with 3 neighbours creatures? Get alive!
-					nextGrid.setCreature(w, h, creature);											
+					nextGrid.setCreature(w, h, creature);
 				} else {
 					// keep exisiting shape in place
 					nextGrid.setCreature(w, h, thisCreature);
@@ -131,12 +121,10 @@ public class Life extends JPanel implements ActionListener {
 		copyGrid(grid, nextGrid);
 
 	}
-	
 
 	/**
-	 * Find neighbor. If we start with an empty place, what to do when there are
-	 * more creatures around? If their is no Fox, all is well. If there are one
-	 * or more Foxes then what? First eat?
+	 * Find neighbor. If we start with an empty place, what to do when there are more creatures around? If their is no Fox, all is well. If there are one or more Foxes then what?
+	 * First eat?
 	 * 
 	 * @param x
 	 * @param y
@@ -162,9 +150,8 @@ public class Life extends JPanel implements ActionListener {
 	}
 
 	/**
-	 * Check all predators on neighbors. A predator can eat only one victim. So find all
-	 * victim. If there is more then one victim, eat one @random => so
-	 * dublicate (a new one is born) predator to predator place.
+	 * Check all predators on neighbors. A predator can eat only one victim. So find all victim. If there is more then one victim, eat one @random => so dublicate (a new one is
+	 * born) predator to predator place.
 	 */
 	private void testForEating(Creatures predator, Creatures victim) {
 
@@ -179,11 +166,11 @@ public class Life extends JPanel implements ActionListener {
 						// loop through eatGrid
 						for (int x = -1; x <= +1; x++) {
 							for (int y = -1; y <= +1; y++) {
-							
+
 								// find first one that can be eaten
 								if (eatGrid[x + 1][y + 1]) {
 									// found, so replace victim by predator
-									grid.setCreature((grid.getGridSize() + (x + w)) % grid.getGridSize(), (grid.getGridSize() + (y + h)) % grid.getGridSize(), predator);									
+									grid.setCreature((grid.getGridSize() + (x + w)) % grid.getGridSize(), (grid.getGridSize() + (y + h)) % grid.getGridSize(), predator);
 									return; // just eat one
 								}
 							}
